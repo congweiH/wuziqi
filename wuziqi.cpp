@@ -8,6 +8,10 @@
 const int BOX_SIZE = 30;
 const int BOX_NUMBER = 19;   // 19根线，也就是18个格子
 
+
+int dx[4]{ 1,0,1,1 }; // - | \ / 四个方向
+int dy[4]{ 0,1,1,-1 };
+
 // 类定义
 
 // 保存位置的类
@@ -17,6 +21,8 @@ class Seat {
 	int j = 0;      // x 坐标
 	int number = 0; // 分数
 };
+
+Seat findBestSeat(int color); // 寻找最佳位置
 
 // 保存棋盘的类
 class Box {
@@ -33,39 +39,287 @@ public:
 	COLORREF color = WHITE; // 棋盘背景色
 };
 
+Box box[19][19];      // 棋盘
 
-// 函数声明
-void draw();                  // 绘制
-void init();                  // 初始化
-Seat findBestSeat(int color); // 寻找最佳位置
-void isWIN();                 // 判断输赢
-void game();                  // 游戏主函数
+// ------------------  Game ----------------------
+class Game {
+public:
+	void init();		// 游戏初始化
+	void play();		// 开始玩游戏
+	void draw();		// 绘画地图
+	void isOver();		// 检测游戏是否结束
 
+public:
+	int whoWin = -1;		// 谁赢了（0：白棋，1：黑棋，2：平局）
+	int whoPlay = 0;		// 轮到谁下棋了
+	int playercolor = 0;  // 玩家颜色
+};
 
-
-// main函数
-int main() {
-	initgraph(700, 700, NOMINIMIZE); // 初始化绘图环境
-	setbkcolor(WHITE);
-	cleardevice();
-	setbkmode(TRANSPARENT); // 设置透明文字输出背景
-	while (1) {
-		init(); // 初始化
-		game(); // 游戏开始
-		cleardevice();
+void Game::init() {
+	this->whoWin = -1;// 谁赢了
+	for (int i = 0; i < 19; i++) {
+		for (int j = 0; j < 19; j++) {
+			box[i][j].number = 0;// 分数
+			box[i][j].value = -1;// 值
+		}
 	}
 }
 
+void Game::play() {
+	// 上一个鼠标停的坐标
+	int oldi = 0;
+	int oldj = 0;
+	// 随机化玩家颜色
+	srand(time(NULL));
+	this->playercolor = rand() % 2;
+	// 绘制背景
+	setfillcolor(RGB(255, 205, 150));
+	solidrectangle(40, 25, 645, 630);
+	// 设置字体样式
+	settextstyle(30, 15, 0, 0, 0, 1000, false, false, false);
+	settextcolor(BLACK);
+	// 输出标示语
+	if (this->playercolor == 0)
+	{
+		outtextxy(150, 650, _T("玩家执白后行，电脑执黑先行"));
+		this->whoPlay = 1;
+	}
+	else
+	{
+		outtextxy(150, 650, _T("玩家执黑先行，电脑执白后行"));
+		this->whoPlay = 0;
+	}
+	this->draw(); // 绘制
+	while (1)
+	{
+	NEXTPLAYER:
+		if (this->whoPlay == 0)
+		{
+			// 玩家下棋
+			MOUSEMSG mouse = GetMouseMsg(); // 获取鼠标信息
+			for (int i = 0; i < 19; i++)
+			{
+				for (int j = 0; j < 19; j++)
+				{
+					if (mouse.x > box[i][j].x && mouse.x<box[i][j].x + 30//判断x坐标
+						&& mouse.y>box[i][j].y && mouse.y < box[i][j].y + 30//判断y坐标
+						&& box[i][j].value == -1)//判断是否是空位置
+					{
+						// 如果停在某一个空位置上面
+						if (mouse.mkLButton)
+						{
+							// 如果按下了
+							box[i][j].value = this->playercolor; // 下棋
+							box[i][j].isnew = true;        // 新位置更新
+							oldi = -1;
+							oldj = -1;
+							// 下一个玩家
+							this->whoPlay = 1;
+							goto DRAW;
+						}
+						// 更新选择框
+						box[oldi][oldj].isnew = false;
+						box[oldi][oldj].draw();
+						box[i][j].isnew = true;
+						box[i][j].draw();
+						oldi = i;
+						oldj = j;
+					}
+				}
+			}
+		}
+		else
+		{
+			// 电脑下棋
+			Seat best;
+			best = findBestSeat(1 - this->playercolor); // 寻找最佳位置
+			if (best.number == 0)
+			{
+				// 开局情况
+				int drawi = 9;
+				int drawj = 9;
+				while (box[drawi][drawj].value != -1)
+				{
+					drawi--;
+					drawj++;
+				}
+				box[drawi][drawj].value = 1 - this->playercolor;
+				box[drawi][drawj].isnew = true;
+			}
+			else
+			{
+				box[best.i][best.j].value = 1 - this->playercolor;//下在最佳位置
+				box[best.i][best.j].isnew = true;
+			}
+			this->whoPlay = 0;
+			goto DRAW; // 轮到下一个
+		}
+	}
+DRAW: // 绘制
+	this->isOver();  // 检测游戏是否结束
+	this->draw();
+	if (this->whoWin == -1)
+	{
+		// 如果没有人胜利
+		Sleep(500);
+		goto NEXTPLAYER; // 前往下一个玩家
+	}
+	// 胜利处理
+	settextcolor(RGB(0, 255, 0));
+	Sleep(1000);
+	if (this->whoWin == 0)
+	{
+		outtextxy(320, 320, _T("白胜"));
+	}
+	if (this->whoWin == 1)
+	{
+		outtextxy(320, 320, _T("黑胜"));
+	}
+	if (this->whoWin == 2)
+	{
+		outtextxy(320, 320, _T("平局"));
+	}
+	// 给反应时间
+	Sleep(5000);
+	return;
+}
 
+void Game::draw() {
+	int modle = 0;  // 棋盘样式
+	int number = 0; // 坐标输出的位置
+	// 坐标（数值）
+	TCHAR strnum[19][3] = { _T("1"),_T("2") ,_T("3") ,_T("4"),_T("5") ,_T("6") ,_T("7"),_T("8"),_T("9"),_T("10"), _T("11"),_T("12") ,_T("13") ,_T("14"),_T("15") ,_T("16") ,_T("17"),_T("18"),_T("19") };
+	// 坐标（字母）
+	TCHAR strabc[19][3] = { _T("A"),_T("B") ,_T("C") ,_T("D"),_T("E") ,_T("F") ,_T("G"),_T("H"),_T("I"),_T("J"), _T("K"),_T("L") ,_T("M") ,_T("N"),_T("O") ,_T("P") ,_T("Q"),_T("R"),_T("S") };
+	for (int i = 0, k = 0; i < 570; i += 30)
+	{
+		for (int j = 0, g = 0; j < 570; j += 30)
+		{
+			box[k][g].color = RGB(255, 205, 150);// 棋盘底色
+			// x、y 坐标
+			box[k][g].x = 65 + j;
+			box[k][g].y = 50 + i;
+			box[k][g].number = 0;// 初始化分数
+			// 棋盘样式的判断
+			if (k == 0 && g == 0)
+			{
+				modle = 8;
+			}
+			else if (k == 0 && g == 18)
+			{
+				modle = 7;
+			}
+			else if (k == 18 && g == 18)
+			{
+				modle = 6;
+			}
+			else if (k == 18 && g == 0)
+			{
+				modle = 5;
+			}
+			else if (k == 0)
+			{
+				modle = 3;
+			}
+			else if (k == 18)
+			{
+				modle = 4;
+			}
+			else if (g == 0)
+			{
+				modle = 1;
+			}
+			else if (g == 18)
+			{
+				modle = 2;
+			}
+			else  if ((k == 3 && g == 3) || (k == 3 && g == 15) || (k == 15 && g == 3) || (k == 15 && g == 15) || (k == 3 && g == 9) || (k == 9 && g == 3) || (k == 15 && g == 9) || (k == 9 && g == 15) || (k == 9 && g == 9))
+			{
+				modle = 9;
+			}
+			else
+			{
+				modle = 0;
+			}
+			box[k][g].modle = modle;
+			box[k][g].draw(); // 绘制
+			if (box[k][g].isnew == true)
+			{
+				box[k][g].isnew = false; // 把上一个下棋位置的黑框清除
+			}
+			g++;
+		}
+		k++;
+	}
+	// 画坐标
+	LOGFONT nowstyle;
+	gettextstyle(&nowstyle);
+	settextstyle(0, 0, NULL);
+	for (int i = 0; i < 19; i++)
+	{
+		outtextxy(75 + number, 35, strnum[i]);
+		outtextxy(53, 55 + number, strabc[i]);
+		number += 30;
+	}
+	settextstyle(&nowstyle);
+}
+
+void Game::isOver() {
+	bool isInit = true; // 是否刚刚开局
+	for (int i = 0; i < 19; i++) {
+		for (int j = 0; j < 19; j++) {
+			if (box[i][j].value != -1) {
+				// 遍历每个可能的位置
+				isInit = false;                 // 如果有，那么就不是刚刚开局
+				int nowcolor = box[i][j].value; // 现在遍历到的颜色
+				int length[4] = { 0,0,0,0 };    // 四个方向的长度
+				for (int k = 0; k < 4; k++) {
+					// 原理同寻找最佳位置
+					int nowi = i;
+					int nowj = j;
+					while (nowi <= 18 && nowj <= 18 && nowi >= 0 && nowj >= 0 && box[nowi][nowj].value == nowcolor)
+					{
+						length[k]++;
+						nowj += dx[k];
+						nowi += dy[k];
+					}
+					nowi = i;
+					nowj = j;
+					while (nowi <= 18 && nowj <= 18 && nowi >= 0 && nowj >= 0 && box[nowi][nowj].value == 1 - nowcolor)
+					{
+						length[k]++;
+						nowj -= dx[k];
+						nowi -= dy[k];
+					}
+				}
+				for (int k = 0; k < 4; k++)
+				{
+					if (length[k] >= 5) {
+						// 如果满五子
+						if (nowcolor == this->playercolor)
+						{
+							this->whoWin = this->playercolor; // 玩家胜
+						}
+						if (nowcolor == 1 - this->playercolor)
+						{
+							this->whoWin = 1 - this->playercolor; // 电脑胜
+						}
+					}
+				}
+				if ((!isInit) && findBestSeat(this->playercolor).number == 0 && findBestSeat(1 - this->playercolor).number == 0)
+				{
+					// 如果不是开局且双方无最佳位置
+					this->whoWin = 2; // 平局
+				}
+			}
+		}
+	}
+}
+// --------------- Game end ----------------------
 
 // 全局变量
-Box box[19][19];      // 棋盘
-int win = -1;         // 谁赢了（0：白棋，1：黑棋，2：平局）
-int whoplay = 0;      // 轮到谁下棋了
-int playercolor = 0;  // 玩家颜色
-int dx[4]{ 1,0,1,1 }; // - | \ / 四个方向
-int dy[4]{ 0,1,1,-1 };
 
+Game game;
 
 
 // 类函数定义
@@ -197,103 +451,6 @@ void Box::draw() {
 	}
 	setfillcolor(thefillcolor); // 还原填充色
 }
-
-
-
-// 其他函数定义
-
-// 绘制棋盘
-void draw() {
-	int modle = 0;  // 棋盘样式
-	int number = 0; // 坐标输出的位置
-	// 坐标（数值）
-	TCHAR strnum[19][3] = { _T("1"),_T("2") ,_T("3") ,_T("4"),_T("5") ,_T("6") ,_T("7"),_T("8"),_T("9"),_T("10"), _T("11"),_T("12") ,_T("13") ,_T("14"),_T("15") ,_T("16") ,_T("17"),_T("18"),_T("19") };
-	// 坐标（字母）
-	TCHAR strabc[19][3] = { _T("A"),_T("B") ,_T("C") ,_T("D"),_T("E") ,_T("F") ,_T("G"),_T("H"),_T("I"),_T("J"), _T("K"),_T("L") ,_T("M") ,_T("N"),_T("O") ,_T("P") ,_T("Q"),_T("R"),_T("S") };
-	for (int i = 0, k = 0; i < 570; i += 30)
-	{
-		for (int j = 0, g = 0; j < 570; j += 30)
-		{
-			box[k][g].color = RGB(255, 205, 150);// 棋盘底色
-			// x、y 坐标
-			box[k][g].x = 65 + j;
-			box[k][g].y = 50 + i;
-			box[k][g].number = 0;// 初始化分数
-			// 棋盘样式的判断
-			if (k == 0 && g == 0)
-			{
-				modle = 8;
-			}
-			else if (k == 0 && g == 18)
-			{
-				modle = 7;
-			}
-			else if (k == 18 && g == 18)
-			{
-				modle = 6;
-			}
-			else if (k == 18 && g == 0)
-			{
-				modle = 5;
-			}
-			else if (k == 0)
-			{
-				modle = 3;
-			}
-			else if (k == 18)
-			{
-				modle = 4;
-			}
-			else if (g == 0)
-			{
-				modle = 1;
-			}
-			else if (g == 18)
-			{
-				modle = 2;
-			}
-			else  if ((k == 3 && g == 3) || (k == 3 && g == 15) || (k == 15 && g == 3) || (k == 15 && g == 15) || (k == 3 && g == 9) || (k == 9 && g == 3) || (k == 15 && g == 9) || (k == 9 && g == 15) || (k == 9 && g == 9))
-			{
-				modle = 9;
-			}
-			else
-			{
-				modle = 0;
-			}
-			box[k][g].modle = modle;
-			box[k][g].draw(); // 绘制
-			if (box[k][g].isnew == true)
-			{
-				box[k][g].isnew = false; // 把上一个下棋位置的黑框清除
-			}
-			g++;
-		}
-		k++;
-	}
-	// 画坐标
-	LOGFONT nowstyle;
-	gettextstyle(&nowstyle);
-	settextstyle(0, 0, NULL);
-	for (int i = 0; i < 19; i++)
-	{
-		outtextxy(75 + number, 35, strnum[i]);
-		outtextxy(53, 55 + number, strabc[i]);
-		number += 30;
-	}
-	settextstyle(&nowstyle);
-}
-
-// 对局初始化
-void init() {
-	win = -1;// 谁赢了
-	for (int i = 0; i < 19; i++) {
-		for (int j = 0; j < 19; j++) {
-			box[i][j].number = 0;// 分数
-			box[i][j].value = -1;// 值
-		}
-	}
-}
-
 
 
 // 核心函数
@@ -442,181 +599,15 @@ Seat findBestSeat(int color)
 	return bestseat;
 }
 
-// 判断输赢
-void isWIN()
-{
-	bool isinit = true; // 是否刚刚开局
-	for (int i = 0; i < 19; i++)
-	{
-		for (int j = 0; j < 19; j++)
-		{
-			if (box[i][j].value != -1)
-			{
-				// 遍历每个可能的位置
-				isinit = false;                 // 如果有，那么就不是刚刚开局
-				int nowcolor = box[i][j].value; // 现在遍历到的颜色
-				int length[4] = { 0,0,0,0 };    // 四个方向的长度
-				for (int k = 0; k < 4; k++)
-				{
-					// 原理同寻找最佳位置
-					int nowi = i;
-					int nowj = j;
-					while (nowi <= 18 && nowj <= 18 && nowi >= 0 && nowj >= 0 && box[nowi][nowj].value == nowcolor)
-					{
-						length[k]++;
-						nowj += dx[k];
-						nowi += dy[k];
-					}
-					nowi = i;
-					nowj = j;
-					while (nowi <= 18 && nowj <= 18 && nowi >= 0 && nowj >= 0 && box[nowi][nowj].value == 1 - nowcolor)
-					{
-						length[k]++;
-						nowj -= dx[k];
-						nowi -= dy[k];
-					}
-				}
-				for (int k = 0; k < 4; k++)
-				{
-					if (length[k] >= 5) {
-						// 如果满五子
-						if (nowcolor == playercolor)
-						{
-							win = playercolor; // 玩家胜
-						}
-						if (nowcolor == 1 - playercolor)
-						{
-							win = 1 - playercolor; // 电脑胜
-						}
-					}
-				}
-				if ((!isinit) && findBestSeat(playercolor).number == 0 && findBestSeat(1 - playercolor).number == 0)
-				{
-					// 如果不是开局且双方无最佳位置
-					win = 2; // 平局
-				}
-			}
-		}
+// main函数
+int main() {
+	initgraph(700, 700, NOMINIMIZE); // 初始化绘图环境
+	setbkcolor(WHITE);
+	cleardevice();
+	setbkmode(TRANSPARENT); // 设置透明文字输出背景
+	while (1) {
+		game.init(); // 初始化
+		game.play(); // 游戏开始
+		cleardevice();
 	}
-}
-
-// 游戏主函数
-void game()
-{
-	// 上一个鼠标停的坐标
-	int oldi = 0;
-	int oldj = 0;
-	// 随机化玩家颜色
-	srand(time(NULL));
-	playercolor = rand() % 2;
-	// 绘制背景
-	setfillcolor(RGB(255, 205, 150));
-	solidrectangle(40, 25, 645, 630);
-	// 设置字体样式
-	settextstyle(30, 15, 0, 0, 0, 1000, false, false, false);
-	settextcolor(BLACK);
-	// 输出标示语
-	if (playercolor == 0)
-	{
-		outtextxy(150, 650, _T("玩家执白后行，电脑执黑先行"));
-		whoplay = 1;
-	}
-	else
-	{
-		outtextxy(150, 650, _T("玩家执黑先行，电脑执白后行"));
-		whoplay = 0;
-	}
-	draw(); // 绘制
-	while (1)
-	{
-	NEXTPLAYER:
-		if (whoplay == 0)
-		{
-			// 玩家下棋
-			MOUSEMSG mouse = GetMouseMsg(); // 获取鼠标信息
-			for (int i = 0; i < 19; i++)
-			{
-				for (int j = 0; j < 19; j++)
-				{
-					if (mouse.x > box[i][j].x && mouse.x<box[i][j].x + 30//判断x坐标
-						&& mouse.y>box[i][j].y && mouse.y < box[i][j].y + 30//判断y坐标
-						&& box[i][j].value == -1)//判断是否是空位置
-					{
-						// 如果停在某一个空位置上面
-						if (mouse.mkLButton)
-						{
-							// 如果按下了
-							box[i][j].value = playercolor; // 下棋
-							box[i][j].isnew = true;        // 新位置更新
-							oldi = -1;
-							oldj = -1;
-							// 下一个玩家
-							whoplay = 1;
-							goto DRAW;
-						}
-						// 更新选择框
-						box[oldi][oldj].isnew = false;
-						box[oldi][oldj].draw();
-						box[i][j].isnew = true;
-						box[i][j].draw();
-						oldi = i;
-						oldj = j;
-					}
-				}
-			}
-		}
-		else
-		{
-			// 电脑下棋
-			Seat best;
-			best = findBestSeat(1 - playercolor); // 寻找最佳位置
-			if (best.number == 0)
-			{
-				// 开局情况
-				int drawi = 9;
-				int drawj = 9;
-				while (box[drawi][drawj].value != -1)
-				{
-					drawi--;
-					drawj++;
-				}
-				box[drawi][drawj].value = 1 - playercolor;
-				box[drawi][drawj].isnew = true;
-			}
-			else
-			{
-				box[best.i][best.j].value = 1 - playercolor;//下在最佳位置
-				box[best.i][best.j].isnew = true;
-			}
-			whoplay = 0;
-			goto DRAW; // 轮到下一个
-		}
-	}
-DRAW: // 绘制
-	isWIN(); // 检测输赢
-	draw();
-	if (win == -1)
-	{
-		// 如果没有人胜利
-		Sleep(500);
-		goto NEXTPLAYER; // 前往下一个玩家
-	}
-	// 胜利处理
-	settextcolor(RGB(0, 255, 0));
-	Sleep(1000);
-	if (win == 0)
-	{
-		outtextxy(320, 320, _T("白胜"));
-	}
-	if (win == 1)
-	{
-		outtextxy(320, 320, _T("黑胜"));
-	}
-	if (win == 2)
-	{
-		outtextxy(320, 320, _T("平局"));
-	}
-	// 给反应时间
-	Sleep(5000);
-	return;
 }
