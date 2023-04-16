@@ -4,13 +4,18 @@
 #include <graphics.h>
 #include <conio.h>
 
+// 整个窗口的大小
+const int WINDOW_HEIGHT = 520;
+const int WINDOW_WIDTH = 520;
+
 // 格子的长宽
 const int BOX_SIZE = 30;
-const int MAP_SIZE = 19;   // 地图大小，每一行或者每一列可以下19个棋子
+// 地图大小，每一行或者每一列可以下13个棋子
+const int MAP_SIZE = 13;
 // 坐标（数值）
-TCHAR strnum[MAP_SIZE][3] = { _T("1"),_T("2") ,_T("3") ,_T("4"),_T("5") ,_T("6") ,_T("7"),_T("8"),_T("9"),_T("10"), _T("11"),_T("12") ,_T("13") ,_T("14"),_T("15") ,_T("16") ,_T("17"),_T("18"),_T("19") };
+TCHAR strnum[MAP_SIZE][3] = { _T("1"),_T("2") ,_T("3") ,_T("4"),_T("5") ,_T("6") ,_T("7"),_T("8"),_T("9"),_T("10"), _T("11"),_T("12") ,_T("13") };
 // 坐标（字母）
-TCHAR strabc[MAP_SIZE][3] = { _T("A"),_T("B") ,_T("C") ,_T("D"),_T("E") ,_T("F") ,_T("G"),_T("H"),_T("I"),_T("J"), _T("K"),_T("L") ,_T("M") ,_T("N"),_T("O") ,_T("P") ,_T("Q"),_T("R"),_T("S") };
+TCHAR strabc[MAP_SIZE][3] = { _T("A"),_T("B") ,_T("C") ,_T("D"),_T("E") ,_T("F") ,_T("G"),_T("H"),_T("I"),_T("J"), _T("K"),_T("L") ,_T("M") };
 
 
 enum Player {
@@ -28,7 +33,7 @@ public:
 	void draw();	        // 绘制棋盘
 	bool isEmpty();			// 位置没有棋子
 
- public:
+public:
 	int x = 0;              // x 坐标
 	int y = 0;              // y 坐标
 	int value = -1;         // 值（0:白棋, 1:黑棋，-1:空位）
@@ -196,7 +201,7 @@ void Game::init() {
 	}
 	// 绘制背景
 	setfillcolor(RGB(255, 205, 150));
-	solidrectangle(40, 25, 645, 630);
+	solidrectangle(40, 25, 475, 460);
 	// 设置字体样式
 	settextstyle(30, 15, 0, 0, 0, 1000, false, false, false);
 	settextcolor(BLACK);
@@ -223,13 +228,11 @@ void Game::play() {
 					// 如果停在某一个空位置上面
 					if (mouse.mkLButton) {
 						// 如果按下了
-						this->total++;
+						this->total++;						// 下棋个数+1
 						box[i][j].value = this->whoPlay;	// 下棋
 						box[i][j].isnew = true;				// 新位置更新
 						oldi = -1;
 						oldj = -1;
-						// 下一个玩家
-						this->whoPlay = !this->whoPlay;
 						goto DRAW;
 					}
 					// 更新选择框
@@ -249,17 +252,19 @@ DRAW: // 绘制
 	if (this->whoWin == -1) {
 		// 如果没有人胜利
 		Sleep(500);
+		// 下一个玩家
+		this->whoPlay = !this->whoPlay;
 		goto NEXTPLAYER; // 前往下一个玩家
 	}
 	// 胜利处理
 	settextcolor(RGB(0, 255, 0));
 	Sleep(1000);
 	if (this->whoWin == 0) {
-		outtextxy(320, 320, _T("白胜"));
+		outtextxy(260, 260, _T("白胜"));
 	} else if (this->whoWin == 1) {
-		outtextxy(320, 320, _T("黑胜"));
+		outtextxy(260, 260, _T("黑胜"));
 	} else if (this->whoWin == 2){
-		outtextxy(320, 320, _T("平局"));
+		outtextxy(260, 260, _T("平局"));
 	}
 	// 给反应时间
 	Sleep(5000);
@@ -268,9 +273,8 @@ DRAW: // 绘制
 
 void Game::draw() {
 	int style = 0;  // 棋盘样式
-	int number = 0; // 坐标输出的位置
-	for (int i = 0, k = 0; i < 570; i += BOX_SIZE) {
-		for (int j = 0, g = 0; j < 570; j += BOX_SIZE) {
+	for (int i = 0, k = 0; i < BOX_SIZE * MAP_SIZE; i += BOX_SIZE) {
+		for (int j = 0, g = 0; j < BOX_SIZE * MAP_SIZE; j += BOX_SIZE) {
 			box[k][g].color = RGB(255, 205, 150);// 棋盘底色
 			// x、y 坐标
 			box[k][g].x = 65 + j;
@@ -278,19 +282,19 @@ void Game::draw() {
 			// 棋盘样式的判断
 			if (k == 0 && g == 0) {
 				style = 8;
-			} else if (k == 0 && g == 18) {
+			} else if (k == 0 && g == MAP_SIZE - 1) {
 				style = 7;
-			} else if (k == 18 && g == 18) {
+			} else if (k == MAP_SIZE - 1 && g == MAP_SIZE - 1) {
 				style = 6;
-			} else if (k == 18 && g == 0) {
+			} else if (k == MAP_SIZE - 1 && g == 0) {
 				style = 5;
 			} else if (k == 0) {
 				style = 3;
-			} else if (k == 18) {
+			} else if (k == MAP_SIZE - 1) {
 				style = 4;
 			} else if (g == 0) {
 				style = 1;
-			} else if (g == 18) {
+			} else if (g == MAP_SIZE - 1) {
 				style = 2;
 			} else  if ((k == 3 && g == 3) || (k == 3 && g == 15) || (k == 15 && g == 3) || (k == 15 && g == 15) || (k == 3 && g == 9) || (k == 9 && g == 3) || (k == 15 && g == 9) || (k == 9 && g == 15) || (k == 9 && g == 9)) {
 				style = 9;
@@ -310,6 +314,7 @@ void Game::draw() {
 	LOGFONT nowstyle;
 	gettextstyle(&nowstyle);
 	settextstyle(0, 0, NULL);
+	int number = 0; // 坐标输出的位置
 	for (int i = 0; i < MAP_SIZE; i++) {
 		outtextxy(75 + number, 35, strnum[i]);
 		outtextxy(53, 55 + number, strabc[i]);
@@ -322,7 +327,7 @@ void Game::isOver() {
 	bool isInit = true; // 是否刚刚开局
 	for (int i = 0; i < MAP_SIZE; i++) {
 		for (int j = 0; j < MAP_SIZE; j++) {
-			if (box[i][j].value != -1) {
+			if (!box[i][j].isEmpty()) {
 				// 遍历每个可能的位置
 				isInit = false;                 // 如果有，那么就不是刚刚开局
 				int nowcolor = box[i][j].value; // 现在遍历到的颜色
@@ -348,8 +353,7 @@ void Game::isOver() {
 				for (int k = 0; k < 4; k++) {
 					// 如果满五子
 					if (length[k] >= 5) {
-						// 赢者是上一个玩家
-						this->whoWin = !this->whoPlay;
+						this->whoWin = this->whoPlay;
 					}
 				}
 				// 全都下满了都没有位置了
@@ -367,7 +371,7 @@ Game game;
 
 // main函数
 int main() {
-	initgraph(700, 700, NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
+	initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
 	setbkcolor(WHITE);					// 设置背景颜色
 	setbkmode(TRANSPARENT);				// 设置透明文字输出背景
 	while (1) {
