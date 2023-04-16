@@ -183,10 +183,10 @@ public:
 		int style = 0;  // 棋盘样式
 		for (int i = 0, k = 0; i < BOX_SIZE * MAP_SIZE; i += BOX_SIZE) {
 			for (int j = 0, g = 0; j < BOX_SIZE * MAP_SIZE; j += BOX_SIZE) {
-				box[k][g].color = RGB(255, 205, 150);// 棋盘底色
+				chess[k][g].color = RGB(255, 205, 150);// 棋盘底色
 				// x、y 坐标
-				box[k][g].x = 65 + j;
-				box[k][g].y = 50 + i;
+				chess[k][g].x = 65 + j;
+				chess[k][g].y = 50 + i;
 				// 棋盘样式的判断
 				if (k == 0 && g == 0) {
 					style = 8;
@@ -218,10 +218,10 @@ public:
 				else {
 					style = 0;
 				}
-				box[k][g].style = style;
-				box[k][g].draw(); // 绘制
-				if (box[k][g].isnew == true) {
-					box[k][g].isnew = false; // 把上一个下棋位置的黑框清除
+				chess[k][g].style = style;
+				chess[k][g].draw(); // 绘制
+				if (chess[k][g].isnew == true) {
+					chess[k][g].isnew = false; // 把上一个下棋位置的黑框清除
 				}
 				g++;
 			}
@@ -241,12 +241,12 @@ public:
 	}
 
 	bool canPut(int i, int j, MOUSEMSG mouse) {
-		return mouse.x > this->box[i][j].x && mouse.x < this->box[i][j].x + BOX_SIZE//判断x坐标
-			&& mouse.y > this->box[i][j].y && mouse.y < this->box[i][j].y + BOX_SIZE//判断y坐标
-			&& this->box[i][j].isEmpty();//判断是否是空位置
+		return mouse.x > this->chess[i][j].x && mouse.x < this->chess[i][j].x + BOX_SIZE//判断x坐标
+			&& mouse.y > this->chess[i][j].y && mouse.y < this->chess[i][j].y + BOX_SIZE//判断y坐标
+			&& this->chess[i][j].isEmpty();//判断是否是空位置
 	}
 public:
-	Chess box[MAP_SIZE][MAP_SIZE];      // 棋盘
+	Chess chess[MAP_SIZE][MAP_SIZE];      // 棋盘
 };
 
 // ----------------------- ChessBoard ------------------
@@ -258,7 +258,7 @@ class Player {
 public:
 	Player(const string& name, int color) : name(name), color(color) {}
 
-	virtual void placeChess(int x, int y) = 0;
+	virtual void placeChess(ChessBoard* chessBoard, int x, int y) = 0;
 private:
 	string name;
 	int color;
@@ -268,8 +268,9 @@ class WhitePlayer : public Player {
 public:
 	WhitePlayer(const string& name) : Player(name, Color::White) {}
 
-	void placeChess(int x, int y) {
-
+	void placeChess(ChessBoard *chessBoard, int x, int y) {
+		chessBoard->chess[x][y].value = 0;
+		chessBoard->chess[x][y].isnew = true;
 	}
 };
 
@@ -277,8 +278,9 @@ class BlackPlayer : public Player {
 public:
 	BlackPlayer(const string& name) : Player(name, Color::Black) {}
 
-	void placeChess(int x, int y) {
-
+	void placeChess(ChessBoard* chessBoard, int x, int y) {
+		chessBoard->chess[x][y].value = 1;
+		chessBoard->chess[x][y].isnew = true;
 	}
 };
 // ----------------------- Player end ----------------------- 
@@ -292,8 +294,8 @@ public:
 		setbkmode(TRANSPARENT);				// 设置透明文字输出背景
 
 
-		this->player[0] = new BlackPlayer("张三");
-		this->player[1] = new BlackPlayer("李四");
+		this->player[0] = new WhitePlayer("白棋");
+		this->player[1] = new BlackPlayer("黑棋");
 		this->chessBoard = new ChessBoard();
 	}
 	void init() {
@@ -301,7 +303,7 @@ public:
 		this->total = 0;
 		for (int i = 0; i < MAP_SIZE; i++) {
 			for (int j = 0; j < MAP_SIZE; j++) {
-				this->chessBoard->box[i][j].value = -1;	// 表示空位置
+				this->chessBoard->chess[i][j].value = -1;	// 表示空位置
 			}
 		}
 		cleardevice();
@@ -313,7 +315,7 @@ public:
 		settextcolor(BLACK);
 	}
 
-	bool waitPlayerPutChess(Player *player, int &oldi, int &oldj, int playerId) {
+	bool waitPlayerPutChess(Player *player, int &oldi, int &oldj) {
 		while (1) {
 			MOUSEMSG mouse = GetMouseMsg(); // 获取鼠标信息
 			for (int i = 0; i < MAP_SIZE; i++) {
@@ -323,17 +325,16 @@ public:
 						if (mouse.mkLButton) {
 							// 如果按下了
 							this->total++;						// 下棋个数+1
-							this->chessBoard->box[i][j].value = playerId;	// 下棋
-							this->chessBoard->box[i][j].isnew = true;				// 新位置更新
+							player->placeChess(chessBoard, i, j);
 							oldi = -1;
 							oldj = -1;
 							return true;
 						}
 						// 更新选择框
-						this->chessBoard->box[oldi][oldj].isnew = false;
-						this->chessBoard->box[oldi][oldj].draw();
-						this->chessBoard->box[i][j].isnew = true;
-						this->chessBoard->box[i][j].draw();
+						this->chessBoard->chess[oldi][oldj].isnew = false;
+						this->chessBoard->chess[oldi][oldj].draw();
+						this->chessBoard->chess[i][j].isnew = true;
+						this->chessBoard->chess[i][j].draw();
 						oldi = i;
 						oldj = j;
 					}
@@ -351,7 +352,7 @@ public:
 		int curPlayerId = 0;
 		while (1) {
 			// 等待玩家放棋子
-			if (this->waitPlayerPutChess(this->player[curPlayerId], oldi, oldj, curPlayerId)) {
+			if (this->waitPlayerPutChess(this->player[curPlayerId], oldi, oldj)) {
 				this->chessBoard->show();
 				if (this->isOver(curPlayerId)) {
 					break;
@@ -365,16 +366,16 @@ public:
 		bool isInit = true; // 是否刚刚开局
 		for (int i = 0; i < MAP_SIZE; i++) {
 			for (int j = 0; j < MAP_SIZE; j++) {
-				if (!this->chessBoard->box[i][j].isEmpty()) {
+				if (!this->chessBoard->chess[i][j].isEmpty()) {
 					// 遍历每个可能的位置
 					isInit = false;                 // 如果有，那么就不是刚刚开局
-					int nowcolor = this->chessBoard->box[i][j].value; // 现在遍历到的颜色
+					int nowcolor = this->chessBoard->chess[i][j].value; // 现在遍历到的颜色
 					int length[4] = { 0, 0, 0, 0 };    // 四个方向的长度
 					for (int k = 0; k < 4; k++) {
 						// 原理同寻找最佳位置
 						int nowi = i;
 						int nowj = j;
-						while (nowi < MAP_SIZE && nowj < MAP_SIZE && nowi >= 0 && nowj >= 0 && this->chessBoard->box[nowi][nowj].value == nowcolor)
+						while (nowi < MAP_SIZE && nowj < MAP_SIZE && nowi >= 0 && nowj >= 0 && this->chessBoard->chess[nowi][nowj].value == nowcolor)
 						{
 							length[k]++;
 							nowj += dx[k];
@@ -382,7 +383,7 @@ public:
 						}
 						nowi = i;
 						nowj = j;
-						while (nowi < MAP_SIZE && nowj < MAP_SIZE && nowi >= 0 && nowj >= 0 && this->chessBoard->box[nowi][nowj].value == 1 - nowcolor) {
+						while (nowi < MAP_SIZE && nowj < MAP_SIZE && nowi >= 0 && nowj >= 0 && this->chessBoard->chess[nowi][nowj].value == 1 - nowcolor) {
 							length[k]++;
 							nowj -= dx[k];
 							nowi -= dy[k];
