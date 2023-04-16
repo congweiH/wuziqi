@@ -34,7 +34,6 @@ public:
 	int value = -1;         // 值（0:白棋, 1:黑棋，-1:空位）
 	int style;               // 选中位置的样式
 	bool isnew = false;     // 是否有选择框
-	int number = 0;         // 分数
 	COLORREF color = WHITE; // 棋盘背景色
 };
 
@@ -192,8 +191,7 @@ void Game::init() {
 	this->total = 0;
 	for (int i = 0; i < MAP_SIZE; i++) {
 		for (int j = 0; j < MAP_SIZE; j++) {
-			box[i][j].number = 0;	// 分数
-			box[i][j].value = -1;	// 值
+			box[i][j].value = -1;	// 表示空位置
 		}
 	}
 	// 绘制背景
@@ -277,7 +275,6 @@ void Game::draw() {
 			// x、y 坐标
 			box[k][g].x = 65 + j;
 			box[k][g].y = 50 + i;
-			box[k][g].number = 0;// 初始化分数
 			// 棋盘样式的判断
 			if (k == 0 && g == 0) {
 				style = 8;
