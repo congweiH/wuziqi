@@ -239,6 +239,12 @@ public:
 		}
 		settextstyle(&nowstyle);
 	}
+
+	bool canPut(int i, int j, MOUSEMSG mouse) {
+		return mouse.x > this->box[i][j].x && mouse.x < this->box[i][j].x + BOX_SIZE//判断x坐标
+			&& mouse.y > this->box[i][j].y && mouse.y < this->box[i][j].y + BOX_SIZE//判断y坐标
+			&& this->box[i][j].isEmpty();//判断是否是空位置
+	}
 public:
 	Chess box[MAP_SIZE][MAP_SIZE];      // 棋盘
 };
@@ -306,33 +312,22 @@ public:
 		settextstyle(30, 15, 0, 0, 0, 1000, false, false, false);
 		settextcolor(BLACK);
 	}
-	void play() {
-		// 上一个鼠标停的坐标
-		int oldi = 0;
-		int oldj = 0;
-		// 随机化
-		srand(time(NULL));
-		this->whoPlay = rand() % 2;
-		this->chessBoard->show(); // 绘制
+
+	bool waitPlayerPutChess(Player *player, int &oldi, int &oldj, int playerId) {
 		while (1) {
-		NEXTPLAYER:
-			// 玩家下棋
 			MOUSEMSG mouse = GetMouseMsg(); // 获取鼠标信息
 			for (int i = 0; i < MAP_SIZE; i++) {
 				for (int j = 0; j < MAP_SIZE; j++) {
-					if (mouse.x > this->chessBoard->box[i][j].x && mouse.x < this->chessBoard->box[i][j].x + BOX_SIZE//判断x坐标
-						&& mouse.y > this->chessBoard->box[i][j].y && mouse.y < this->chessBoard->box[i][j].y + BOX_SIZE//判断y坐标
-						&& this->chessBoard->box[i][j].isEmpty())//判断是否是空位置
-					{
+					if (this->chessBoard->canPut(i, j, mouse)) {
 						// 如果停在某一个空位置上面
 						if (mouse.mkLButton) {
 							// 如果按下了
 							this->total++;						// 下棋个数+1
-							this->chessBoard->box[i][j].value = this->whoPlay;	// 下棋
+							this->chessBoard->box[i][j].value = playerId;	// 下棋
 							this->chessBoard->box[i][j].isnew = true;				// 新位置更新
 							oldi = -1;
 							oldj = -1;
-							goto DRAW;
+							return true;
 						}
 						// 更新选择框
 						this->chessBoard->box[oldi][oldj].isnew = false;
@@ -345,34 +340,28 @@ public:
 				}
 			}
 		}
-	DRAW: // 绘制
-		this->isOver();  // 检测游戏是否结束
-		this->chessBoard->show();
-		if (this->whoWin == -1) {
-			// 如果没有人胜利
-			Sleep(500);
-			// 下一个玩家
-			this->whoPlay = !this->whoPlay;
-			goto NEXTPLAYER; // 前往下一个玩家
-		}
-		// 胜利处理
-		settextcolor(RGB(0, 255, 0));
-		Sleep(1000);
-		if (this->whoWin == 0) {
-			outtextxy(260, 260, _T("白胜"));
-		}
-		else if (this->whoWin == 1) {
-			outtextxy(260, 260, _T("黑胜"));
-		}
-		else if (this->whoWin == 2) {
-			outtextxy(260, 260, _T("平局"));
-		}
-		// 给反应时间
-		Sleep(5000);
-		return;
 	}
 
-	void isOver() {
+	void play() {
+		// 上一个鼠标停的坐标
+		int oldi = 0;
+		int oldj = 0;
+		this->chessBoard->show(); // 绘制
+		// 0 白棋先下, 1 黑棋后下, 轮循
+		int curPlayerId = 0;
+		while (1) {
+			// 等待玩家放棋子
+			if (this->waitPlayerPutChess(this->player[curPlayerId], oldi, oldj, curPlayerId)) {
+				this->chessBoard->show();
+				if (this->isOver(curPlayerId)) {
+					break;
+				}
+				curPlayerId = !curPlayerId;  // 0 变 1， 1 变 0 
+			}
+		}
+	}
+
+	bool isOver(int playerId) {
 		bool isInit = true; // 是否刚刚开局
 		for (int i = 0; i < MAP_SIZE; i++) {
 			for (int j = 0; j < MAP_SIZE; j++) {
@@ -402,7 +391,7 @@ public:
 					for (int k = 0; k < 4; k++) {
 						// 如果满五子
 						if (length[k] >= 5) {
-							this->whoWin = this->whoPlay;
+							this->whoWin = playerId;
 						}
 					}
 					// 全都下满了都没有位置了
@@ -412,11 +401,30 @@ public:
 				}
 			}
 		}
+		if (this->whoWin == -1) {
+			// 如果没有人胜利
+			Sleep(500);
+			return false;
+		}
+		// 胜利处理
+		settextcolor(RGB(0, 255, 0));
+		Sleep(1000);
+		if (this->whoWin == 0) {
+			outtextxy(260, 260, _T("白胜"));
+		}
+		else if (this->whoWin == 1) {
+			outtextxy(260, 260, _T("黑胜"));
+		}
+		else if (this->whoWin == 2) {
+			outtextxy(260, 260, _T("平局"));
+		}
+		// 给反应时间
+		Sleep(5000);
+		return true;
 	}
 
 public:
 	int whoWin = -1;		// 谁赢了（0：白棋，1：黑棋，2：平局）
-	int whoPlay = 0;		// 轮到谁下棋了（0: 白棋，1:黑棋）
 	int total = 0;			// 一共下了多少个棋子
 	Player* player[2];
 	ChessBoard* chessBoard;
