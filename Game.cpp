@@ -3,11 +3,14 @@
 int dx[4]{ 1, 0, 1, 1 }; // - | \ / 四个方向
 int dy[4]{ 0, 1, 1, -1 };
 
+TCHAR message[3][20] = { _T("白胜，按回车键继续"), _T("黑胜，按回车键继续"), _T("平局，按回车键继续")};
+
 Game::Game() {
 	this->player[0] = new WhitePlayer("白棋");
 	this->player[1] = new BlackPlayer("黑棋");
 	this->chessBoard = new ChessBoard();
 }
+
 // 游戏初始化
 void Game::init() {
 	initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
@@ -75,6 +78,8 @@ void Game::play() {
 		if (this->waitPlayerPutChess(this->player[curPlayerId], oldi, oldj)) {
 			this->chessBoard->show();
 			if (this->isOver(curPlayerId)) {
+				// 弹框提示
+				MessageBox(GetHWnd(), message[this->whoWin], _T("游戏结束"), MB_ICONWARNING);
 				break;
 			}
 			curPlayerId = !curPlayerId;  // 0 变 1， 1 变 0 
@@ -128,19 +133,5 @@ bool Game::isOver(int playerId) {
 		Sleep(500);
 		return false;
 	}
-	// 胜利处理
-	settextcolor(RGB(0, 255, 0));
-	Sleep(1000);
-	if (this->whoWin == 0) {
-		outtextxy(260, 260, _T("白胜"));
-	}
-	else if (this->whoWin == 1) {
-		outtextxy(260, 260, _T("黑胜"));
-	}
-	else if (this->whoWin == 2) {
-		outtextxy(260, 260, _T("平局"));
-	}
-	// 给反应时间
-	Sleep(5000);
 	return true;
 }
