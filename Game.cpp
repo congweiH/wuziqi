@@ -3,7 +3,7 @@
 int dx[4]{ 1, 0, 1, 1 }; // - | \ / 四个方向
 int dy[4]{ 0, 1, 1, -1 };
 
-TCHAR message[3][20] = { _T("白胜，按回车键继续"), _T("黑胜，按回车键继续"), _T("平局，按回车键继续")};
+TCHAR message[3][20] = { _T("白胜"), _T("黑胜"), _T("平局")};
 
 Game::Game() {
 	this->player[0] = new WhitePlayer("白棋");
@@ -16,7 +16,6 @@ void Game::init() {
 	initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
 	setbkcolor(WHITE);					// 设置背景颜色
 	setbkmode(TRANSPARENT);				// 设置透明文字输出背景
-
 }
 
 // 等待玩家下棋
