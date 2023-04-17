@@ -4,7 +4,7 @@
 #include <graphics.h>
 #include <conio.h>
 #include <string>
-#include <cstring>
+#include <cstring>a
 
 using namespace std;
 
