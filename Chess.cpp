@@ -1,13 +1,13 @@
-#include "Chess.h"
+ï»¿#include "Chess.h"
 
 void Chess::draw() {
-	COLORREF thefillcolor = getfillcolor(); // ±¸·ÝÌî³äÑÕÉ«
-	setlinestyle(PS_SOLID, 2);              // ÏßÑùÊ½ÉèÖÃ
-	setfillcolor(color);                    // Ìî³äÑÕÉ«ÉèÖÃ
-	solidrectangle(x, y, x + BOX_SIZE, y + BOX_SIZE);   // »æÖÆÎÞ±ß¿òµÄÕý·½ÐÎ
+	COLORREF thefillcolor = getfillcolor(); // å¤‡ä»½å¡«å……é¢œè‰²
+	setlinestyle(PS_SOLID, 2);              // çº¿æ ·å¼è®¾ç½®
+	setfillcolor(color);                    // å¡«å……é¢œè‰²è®¾ç½®
+	solidrectangle(x, y, x + BOX_SIZE, y + BOX_SIZE);   // ç»˜åˆ¶æ— è¾¹æ¡†çš„æ­£æ–¹å½¢
 	if (isnew) {
-		// Èç¹ûÊÇÐÂÏÂµÄ
-		// »æÖÆ±ß¿òÏß
+		// å¦‚æžœæ˜¯æ–°ä¸‹çš„
+		// ç»˜åˆ¶è¾¹æ¡†çº¿
 		setlinecolor(LIGHTGRAY);
 		line(x + 1, y + 2, x + 8, y + 2);
 		line(x + 2, y + 1, x + 2, y + 8);
@@ -20,7 +20,7 @@ void Chess::draw() {
 	}
 	setlinecolor(BLACK);
 	switch (style) {
-		// ÒÔÏÂÊÇ²»Í¬Î»ÖÃÆåÅÌµÄÑùÊ½
+		// ä»¥ä¸‹æ˜¯ä¸åŒä½ç½®æ£‹ç›˜çš„æ ·å¼
 	case 0:
 		line(x + 15, y, x + 15, y + 30);
 		line(x - 1, y + 15, x + 30, y + 15);
@@ -112,21 +112,21 @@ void Chess::draw() {
 		//  *
 	}
 	switch (value) {
-	case 0: // °×Æå
+	case 0: // ç™½æ£‹
 		setfillcolor(WHITE);
 		setlinestyle(PS_SOLID, 1);
 		fillcircle(x + 15, y + 15, 13);
 		break;
-	case 1: // ºÚÆå
+	case 1: // é»‘æ£‹
 		setfillcolor(BLACK);
 		setlinestyle(PS_SOLID, 1);
 		fillcircle(x + 15, y + 15, 13);
 		break;
 	}
-	setfillcolor(thefillcolor); // »¹Ô­Ìî³äÉ«
+	setfillcolor(thefillcolor); // è¿˜åŽŸå¡«å……è‰²
 }
 
-// ÅÐ¶Ïµ±Ç°Î»ÖÃÊÇ²»ÊÇ¿ÕÎ»
+// åˆ¤æ–­å½“å‰ä½ç½®æ˜¯ä¸æ˜¯ç©ºä½
 bool Chess::isEmpty() {
 	return this->value == -1;
 }

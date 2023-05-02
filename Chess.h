@@ -1,5 +1,5 @@
-#pragma once
-#include <graphics.h>
+ï»¿#pragma once
+#include <easyx.h>
 #define BOX_SIZE 30
 
 
@@ -18,10 +18,10 @@ public:
 	void setValue(int value);
 
 private:
-	int x = 0;              // Æå×ÓµÄ x ×ø±ê
-	int y = 0;              // Æå×ÓµÄ y ×ø±ê
-	int value = -1;         // Öµ£¨0:°×Æå, 1:ºÚÆå£¬-1:¿ÕÎ»£©
-	int style;              // Ñ¡ÖĞÎ»ÖÃµÄÑùÊ½, ÓÃÓÚ»æÖÆ²»Í¬µÄÍ¼°¸
-	bool isnew = false;     // Êó±êĞü¸¡ÔÚÆåÅÌÓĞÑ¡Ôñ¿ò£¬Èç¹ûisnewÎªtrue£¬ÄÇÃ´»áÖØĞÂ»æÖÆÑ¡Ôñ¿ò
-	COLORREF color = WHITE; // ÆåÅÌ±³¾°É«
+	int x = 0;              // æ£‹å­çš„ x åæ ‡
+	int y = 0;              // æ£‹å­çš„ y åæ ‡
+	int value = -1;         // å€¼ï¼ˆ0:ç™½æ£‹, 1:é»‘æ£‹ï¼Œ-1:ç©ºä½ï¼‰
+	int style;              // é€‰ä¸­ä½ç½®çš„æ ·å¼, ç”¨äºç»˜åˆ¶ä¸åŒçš„å›¾æ¡ˆ
+	bool isnew = false;     // é¼ æ ‡æ‚¬æµ®åœ¨æ£‹ç›˜æœ‰é€‰æ‹©æ¡†ï¼Œå¦‚æœisnewä¸ºtrueï¼Œé‚£ä¹ˆä¼šé‡æ–°ç»˜åˆ¶é€‰æ‹©æ¡†
+	COLORREF color = WHITE; // æ£‹ç›˜èƒŒæ™¯è‰²
 };

@@ -1,14 +1,14 @@
-#include "ChessBoard.h"
+ï»¿#include "ChessBoard.h"
 
-// »­ÆåÅÌ
-void ChessBoard::show() {
-	int style = 0;  // ÆåÅÌÑùÊ½
+// ç”»æ£‹ç›˜
+void ChessBoard::draw() {
+	int style = 0;  // æ£‹ç›˜æ ·å¼
 	for (int i = 0; i < MAP_SIZE; i++) {
 		for (int j = 0; j < MAP_SIZE; j++) {
-			this->chess[i][j].setColor(RGB(255, 205, 150));	// ÆåÅÌµ×É«
-			// x¡¢y ×ø±ê
+			this->chess[i][j].setColor(RGB(255, 205, 150));	// æ£‹ç›˜åº•è‰²
+			// xã€y åæ ‡
 			this->chess[i][j].setXY(65 + j * BOX_SIZE, 50 + i * BOX_SIZE);
-			// ÆåÅÌÑùÊ½µÄÅĞ¶Ï
+			// æ£‹ç›˜æ ·å¼çš„åˆ¤æ–­
 			if (i == 0 && j == 0) {
 				style = 8;
 			}
@@ -40,21 +40,21 @@ void ChessBoard::show() {
 				style = 0;
 			}
 			this->chess[i][j].setStyle(style);
-			this->chess[i][j].draw(); // »æÖÆ
+			this->chess[i][j].draw(); // ç»˜åˆ¶
 			if (chess[i][j].getIsnew() == true) {
-				chess[i][j].setIsnew(false); // °ÑÉÏÒ»¸öÏÂÆåÎ»ÖÃµÄºÚ¿òÇå³ı
+				chess[i][j].setIsnew(false); // æŠŠä¸Šä¸€ä¸ªä¸‹æ£‹ä½ç½®çš„é»‘æ¡†æ¸…é™¤
 			}
 		}
 	}
-	// »­×ø±ê
+	// ç”»åæ ‡
 	LOGFONT nowstyle;
 	gettextstyle(&nowstyle);
 	settextstyle(0, 0, NULL);
 
-	int number = 0; // ×ø±êÊä³öµÄÎ»ÖÃ
-	// ×ø±ê£¨ÊıÖµ£©
+	int number = 0; // åæ ‡è¾“å‡ºçš„ä½ç½®
+	// åæ ‡ï¼ˆæ•°å€¼ï¼‰
 	TCHAR strnum[MAP_SIZE][3] = { _T("1"),_T("2") ,_T("3") ,_T("4"),_T("5") ,_T("6") ,_T("7"),_T("8"),_T("9"),_T("10"), _T("11"),_T("12") ,_T("13") };
-	// ×ø±ê£¨×ÖÄ¸£©
+	// åæ ‡ï¼ˆå­—æ¯ï¼‰
 	TCHAR strabc[MAP_SIZE][3] = { _T("A"),_T("B") ,_T("C") ,_T("D"),_T("E") ,_T("F") ,_T("G"),_T("H"),_T("I"),_T("J"), _T("K"),_T("L") ,_T("M") };
 	for (int i = 0; i < MAP_SIZE; i++) {
 		outtextxy(75 + number, 35, strnum[i]);
@@ -64,9 +64,9 @@ void ChessBoard::show() {
 	settextstyle(&nowstyle);
 }
 
-// ÅĞ¶ÏÆåÅÌi,jÎ»ÖÃÄÜ²»ÄÜ·ÅÆå×Ó
-bool ChessBoard::canPut(int i, int j, MOUSEMSG mouse) {
-	return mouse.x > this->chess[i][j].getX() && mouse.x < this->chess[i][j].getX() + BOX_SIZE//ÅĞ¶Ïx×ø±ê
-		&& mouse.y > this->chess[i][j].getY() && mouse.y < this->chess[i][j].getY() + BOX_SIZE//ÅĞ¶Ïy×ø±ê
-		&& this->chess[i][j].isEmpty();//ÅĞ¶ÏÊÇ·ñÊÇ¿ÕÎ»ÖÃ
+// åˆ¤æ–­æ£‹ç›˜i,jä½ç½®èƒ½ä¸èƒ½æ”¾æ£‹å­
+bool ChessBoard::canPut(int i, int j, ExMessage mouse) {
+	return mouse.x > this->chess[i][j].getX() && mouse.x < this->chess[i][j].getX() + BOX_SIZE//åˆ¤æ–­xåæ ‡
+		&& mouse.y > this->chess[i][j].getY() && mouse.y < this->chess[i][j].getY() + BOX_SIZE//åˆ¤æ–­yåæ ‡
+		&& this->chess[i][j].isEmpty();//åˆ¤æ–­æ˜¯å¦æ˜¯ç©ºä½ç½®
 }

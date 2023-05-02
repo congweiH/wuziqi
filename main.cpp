@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <time.h>
 #include <stdlib.h>
-#include <graphics.h>
+#include <easyx.h>
 #include <conio.h>
 #include <string>
 #include <cstring>

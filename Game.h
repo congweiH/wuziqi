@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "ChessBoard.h"
 #include "Player.h"
 #include "WhitePlayer.h"
@@ -19,9 +19,9 @@ public:
 	bool isOver(int playerId);
 
 public:
-	int whoWin = -1;		// Ë­Ó®ÁË£¨0£º°×Æå£¬1£ººÚÆå£¬2£ºÆ½¾Ö£©
-	int total = 0;			// Ò»¹²ÏÂÁË¶àÉÙ¸öÆå×Ó
-	Player* player[2];		// Á½¸öÍæ¼Ò
-	ChessBoard* chessBoard; // ÆåÅÌ
+	int whoWin = -1;		// è°èµ¢äº†ï¼ˆ0ï¼šç™½æ£‹ï¼Œ1ï¼šé»‘æ£‹ï¼Œ2ï¼šå¹³å±€ï¼‰
+	int total = 0;			// ä¸€å…±ä¸‹äº†å¤šå°‘ä¸ªæ£‹å­
+	Player* player[2];		// ä¸¤ä¸ªç©å®¶
+	ChessBoard* chessBoard; // æ£‹ç›˜
 };
 

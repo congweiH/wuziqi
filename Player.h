@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <string>
 #include "ChessBoard.h"
 using namespace std;
@@ -14,6 +14,6 @@ public:
 	virtual void placeChess(ChessBoard* chessBoard, int x, int y) = 0;
 
 private:
-	string name;	// Íæ¼ÒÃû³Æ
-	int color;		// Íæ¼ÒµÄÑÕÉ«
+	string name;	// ç©å®¶åç§°
+	int color;		// ç©å®¶çš„é¢œè‰²
 };

@@ -1,40 +1,40 @@
-#include "Game.h"
+ï»¿#include "Game.h"
 
-int dx[4]{ 1, 0, 1, 1 }; // - | \ / ËÄ¸ö·½Ïò
+int dx[4]{ 1, 0, 1, 1 }; // - | \ / å››ä¸ªæ–¹å‘
 int dy[4]{ 0, 1, 1, -1 };
 
-TCHAR message[3][20] = { _T("°×Ê¤"), _T("ºÚÊ¤"), _T("Æ½¾Ö")};
+TCHAR message[3][20] = { _T("ç™½èƒœ"), _T("é»‘èƒœ"), _T("å¹³å±€")};
 
 Game::Game() {
-	this->player[0] = new WhitePlayer("°×Æå");
-	this->player[1] = new BlackPlayer("ºÚÆå");
+	this->player[0] = new WhitePlayer("ç™½æ£‹");
+	this->player[1] = new BlackPlayer("é»‘æ£‹");
 	this->chessBoard = new ChessBoard();
 }
 
-// ÓÎÏ·³õÊ¼»¯
+// æ¸¸æˆåˆå§‹åŒ–
 void Game::init() {
-	initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, NOMINIMIZE);	// ³õÊ¼»¯´°¿Ú£¬NOMINIMIZE±íÊ¾²»ÔÊĞí×îĞ¡»¯
-	setbkcolor(WHITE);					// ÉèÖÃ±³¾°ÑÕÉ«
-	setbkmode(TRANSPARENT);				// ÉèÖÃÍ¸Ã÷ÎÄ×ÖÊä³ö±³¾°
+	initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, EX_NOMINIMIZE);	// åˆå§‹åŒ–çª—å£ï¼ŒNOMINIMIZEè¡¨ç¤ºä¸å…è®¸æœ€å°åŒ–
+	setbkcolor(WHITE);					// è®¾ç½®èƒŒæ™¯é¢œè‰²
+	setbkmode(TRANSPARENT);				// è®¾ç½®é€æ˜æ–‡å­—è¾“å‡ºèƒŒæ™¯
 }
 
-// µÈ´ıÍæ¼ÒÏÂÆå
+// ç­‰å¾…ç©å®¶ä¸‹æ£‹
 bool Game::waitPlayerPutChess(Player* player, int& oldi, int& oldj) {
 	while (1) {
-		MOUSEMSG mouse = GetMouseMsg(); // »ñÈ¡Êó±êĞÅÏ¢
+		ExMessage mouse = getmessage(EX_MOUSE); // è·å–é¼ æ ‡ä¿¡æ¯
 		for (int i = 0; i < MAP_SIZE; i++) {
 			for (int j = 0; j < MAP_SIZE; j++) {
 				if (this->chessBoard->canPut(i, j, mouse)) {
-					// Èç¹ûÍ£ÔÚÄ³Ò»¸ö¿ÕÎ»ÖÃÉÏÃæ
-					if (mouse.mkLButton) {
-						// Èç¹û°´ÏÂÁË
-						this->total++;						// ÏÂÆå¸öÊı+1
+					// å¦‚æœåœåœ¨æŸä¸€ä¸ªç©ºä½ç½®ä¸Šé¢
+					if (mouse.lbutton) {
+						// å¦‚æœæŒ‰ä¸‹äº†
+						this->total++;						// ä¸‹æ£‹ä¸ªæ•°+1
 						player->placeChess(chessBoard, i, j);
 						oldi = -1;
 						oldj = -1;
 						return true;
 					}
-					// ¸üĞÂÑ¡Ôñ¿ò
+					// æ›´æ–°é€‰æ‹©æ¡†
 					this->chessBoard->chess[oldi][oldj].setIsnew(false);
 					this->chessBoard->chess[oldi][oldj].draw();
 					this->chessBoard->chess[i][j].setIsnew(true);
@@ -48,56 +48,56 @@ bool Game::waitPlayerPutChess(Player* player, int& oldi, int& oldj) {
 }
 
 void Game::draw() {
-	this->whoWin = -1;// Ë­Ó®ÁË
+	this->whoWin = -1;// è°èµ¢äº†
 	this->total = 0;
 	for (int i = 0; i < MAP_SIZE; i++) {
 		for (int j = 0; j < MAP_SIZE; j++) {
-			this->chessBoard->chess[i][j].setValue(-1);	// ±íÊ¾¿ÕÎ»ÖÃ
+			this->chessBoard->chess[i][j].setValue(-1);	// è¡¨ç¤ºç©ºä½ç½®
 		}
 	}
 	cleardevice();
-	// »æÖÆ±³¾°
+	// ç»˜åˆ¶èƒŒæ™¯
 	setfillcolor(RGB(255, 205, 150));
 	solidrectangle(40, 25, 475, 460);
-	// ÉèÖÃ×ÖÌåÑùÊ½
+	// è®¾ç½®å­—ä½“æ ·å¼
 	settextstyle(30, 15, 0, 0, 0, 1000, false, false, false);
 	settextcolor(BLACK);
-	this->chessBoard->show(); // »æÖÆ
+	this->chessBoard->draw(); // ç»˜åˆ¶
 }
 
-// ¿ªÊ¼ÓÎÏ·
+// å¼€å§‹æ¸¸æˆ
 void Game::play() {
-	// ÉÏÒ»¸öÊó±êÍ£µÄ×ø±ê
+	// ä¸Šä¸€ä¸ªé¼ æ ‡åœçš„åæ ‡
 	int oldi = 0;
 	int oldj = 0;
-	// 0 °×ÆåÏÈÏÂ, 1 ºÚÆåºóÏÂ, ÂÖÑ­
+	// 0 ç™½æ£‹å…ˆä¸‹, 1 é»‘æ£‹åä¸‹, è½®å¾ª
 	int curPlayerId = 0;
 	while (1) {
-		// µÈ´ıÍæ¼Ò·ÅÆå×Ó
+		// ç­‰å¾…ç©å®¶æ”¾æ£‹å­
 		if (this->waitPlayerPutChess(this->player[curPlayerId], oldi, oldj)) {
-			this->chessBoard->show();
+			this->chessBoard->draw();
 			if (this->isOver(curPlayerId)) {
-				// µ¯¿òÌáÊ¾
-				MessageBox(GetHWnd(), message[this->whoWin], _T("ÓÎÏ·½áÊø"), MB_ICONWARNING);
+				// å¼¹æ¡†æç¤º
+				MessageBox(GetHWnd(), message[this->whoWin], _T("æ¸¸æˆç»“æŸ"), MB_ICONWARNING);
 				break;
 			}
-			curPlayerId = !curPlayerId;  // 0 ±ä 1£¬ 1 ±ä 0 
+			curPlayerId = !curPlayerId;  // 0 å˜ 1ï¼Œ 1 å˜ 0 
 		}
 	}
 }
 
-// ÅĞ¶ÏÓÎÏ·ÊÇ·ñ½áÊø
+// åˆ¤æ–­æ¸¸æˆæ˜¯å¦ç»“æŸ
 bool Game::isOver(int playerId) {
-	bool isInit = true; // ÊÇ·ñ¸Õ¸Õ¿ª¾Ö
+	bool isInit = true; // æ˜¯å¦åˆšåˆšå¼€å±€
 	for (int i = 0; i < MAP_SIZE; i++) {
 		for (int j = 0; j < MAP_SIZE; j++) {
 			if (!this->chessBoard->chess[i][j].isEmpty()) {
-				// ±éÀúÃ¿¸ö¿ÉÄÜµÄÎ»ÖÃ
-				isInit = false;                 // Èç¹ûÓĞ£¬ÄÇÃ´¾Í²»ÊÇ¸Õ¸Õ¿ª¾Ö
-				int nowcolor = this->chessBoard->chess[i][j].getValue(); // ÏÖÔÚ±éÀúµ½µÄÑÕÉ«
-				int length[4] = { 0, 0, 0, 0 };    // ËÄ¸ö·½ÏòµÄ³¤¶È
+				// éå†æ¯ä¸ªå¯èƒ½çš„ä½ç½®
+				isInit = false;                 // å¦‚æœæœ‰ï¼Œé‚£ä¹ˆå°±ä¸æ˜¯åˆšåˆšå¼€å±€
+				int nowcolor = this->chessBoard->chess[i][j].getValue(); // ç°åœ¨éå†åˆ°çš„é¢œè‰²
+				int length[4] = { 0, 0, 0, 0 };    // å››ä¸ªæ–¹å‘çš„é•¿åº¦
 				for (int k = 0; k < 4; k++) {
-					// Ô­ÀíÍ¬Ñ°ÕÒ×î¼ÑÎ»ÖÃ
+					// åŸç†åŒå¯»æ‰¾æœ€ä½³ä½ç½®
 					int nowi = i;
 					int nowj = j;
 					while (nowi < MAP_SIZE && nowj < MAP_SIZE && nowi >= 0 && nowj >= 0 && this->chessBoard->chess[nowi][nowj].getValue() == nowcolor)
@@ -115,20 +115,20 @@ bool Game::isOver(int playerId) {
 					}
 				}
 				for (int k = 0; k < 4; k++) {
-					// Èç¹ûÂúÎå×Ó
+					// å¦‚æœæ»¡äº”å­
 					if (length[k] >= 5) {
 						this->whoWin = playerId;
 					}
 				}
-				// È«¶¼ÏÂÂúÁË¶¼Ã»ÓĞÎ»ÖÃÁË
+				// å…¨éƒ½ä¸‹æ»¡äº†éƒ½æ²¡æœ‰ä½ç½®äº†
 				if (this->total == MAP_SIZE * MAP_SIZE) {
-					this->whoWin = 2; // Æ½¾Ö
+					this->whoWin = 2; // å¹³å±€
 				}
 			}
 		}
 	}
 	if (this->whoWin == -1) {
-		// Èç¹ûÃ»ÓĞÈËÊ¤Àû
+		// å¦‚æœæ²¡æœ‰äººèƒœåˆ©
 		Sleep(500);
 		return false;
 	}
