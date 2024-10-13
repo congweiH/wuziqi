@@ -9,9 +9,6 @@ link_directories(${EASYX_DIR}/lib64)
 link_libraries(libEasyX.a)
 
 add_executable(wuziqi main.cpp
-        BlackPlayer.cpp
-        Chess.cpp
         ChessBoard.cpp
         Game.cpp
-        Player.cpp
-        WhitePlayer.cpp)
+)
