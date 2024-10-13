@@ -8,12 +8,12 @@
 
 class Game {
 public:
-	Game();
-	void draw();
+    Game();
+    void draw();
     void update();
     void pollEvents();
 
 public:
-	ChessBoard* chessBoard; // 棋盘
+    ChessBoard* chessBoard; // 棋盘
     bool running = true;  // 游戏是否正在进行
 };

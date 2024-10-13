@@ -2,7 +2,7 @@
 #include <iostream>
 
 Game::Game() {
-	chessBoard = new ChessBoard();
+    chessBoard = new ChessBoard();
 
     initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, EX_NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
     setbkcolor(WHITE);					// 设置背景颜色
@@ -12,9 +12,9 @@ Game::Game() {
 }
 
 void Game::draw() {
-	cleardevice();
+    cleardevice();
     BeginBatchDraw();
-	chessBoard->draw();
+    chessBoard->draw();
     EndBatchDraw();
 }
 
