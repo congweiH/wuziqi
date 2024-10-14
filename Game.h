@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <easyx.h>
 #include "ChessBoard.h"
 
 #define WINDOW_HEIGHT 520

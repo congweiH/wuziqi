@@ -1,8 +1,4 @@
 ﻿#include "ChessBoard.h"
-#include <iostream>
-
-int dx[4]{ 1, 0, 1, 1 }; // - | \ / 四个方向
-int dy[4]{ 0, 1, 1, -1 };
 
 // 画棋盘
 void ChessBoard::draw() {
@@ -101,7 +97,7 @@ void ChessBoard::putBlackChess(int i, int j) {
     chess[i][j] = -1;
 }
 
-void ChessBoard::handleExMessage(const ExMessage &msg) {
+void ChessBoard::pollEvents(const ExMessage &msg) {
     if (msg.message == WM_MOUSEMOVE) {
         int i = -1;
         int j = -1;
@@ -118,7 +114,7 @@ void ChessBoard::handleExMessage(const ExMessage &msg) {
         int i = -1;
         int j = -1;
         bool inSide = pixelToChess(msg.x, msg.y, i, j);
-        if (inSide) {
+        if (inSide && canPut(i, j)) {
             putChess(i, j);
         }
     }
@@ -130,7 +126,7 @@ void ChessBoard::putChess(int i, int j) {
     } else {
         putBlackChess(i, j);
     }
-    player = !player;
+    player = -player;
 }
 
 bool ChessBoard::pixelToChess(int x, int y, int &i, int &j) const {
@@ -145,33 +141,39 @@ bool ChessBoard::pixelToChess(int x, int y, int &i, int &j) const {
 }
 
 int ChessBoard::hasWinner() {
-    for (int i = 0; i < BOX_COUNT + 1; i++) {
-        for (int j = 0; j < BOX_COUNT + 1; j++) {
-            if (chess[i][j] != 0) {
-                // 遍历每个可能的位置
-                int nowcolor = chess[i][j]; // 现在遍历到的颜色
+    for (int row = 0; row < BOX_COUNT + 1; ++row) {
+        for (int col = 0; col < BOX_COUNT + 1; ++col) {
+            if (chess[row][col] == 0) continue;
 
-                int length[4] = { 0, 0, 0, 0 };    // 四个方向的长度
-                for (int k = 0; k < 4; k++) {
-                    // 原理同寻找最佳位置
-                    int nowi = i;
-                    int nowj = j;
-                    while (nowi < BOX_COUNT + 1 && nowj < BOX_COUNT + 1 && nowi >= 0 && nowj >= 0 && chess[nowi][nowj] == nowcolor)
-                    {
-                        length[k]++;
-                        nowj += dx[k];
-                        nowi += dy[k];
-                    }
-                }
-                for (int k = 0; k < 4; k++) {
-                    // 如果满五子
-                    if (length[k] >= 5) {
-                        std::cout << "找到了五子连线: " << player << std::endl;
-                        return player;
-                    }
-                }
-            }
+            // 检查水平方向
+            if (checkLine(row, col, 0, 1)) return -player;
+            // 检查垂直方向
+            if (checkLine(row, col, 1, 0)) return -player;
+            // 检查正对角线方向
+            if (checkLine(row, col, 1, 1)) return -player;
+            // 检查反对角线方向
+            if (checkLine(row, col, 1, -1)) return -player;
         }
     }
     return 0;
+}
+
+bool ChessBoard::checkLine(int i, int j, int dx, int dy) {
+    int count = 0;
+    char currentPiece = chess[i][j];
+    for (int c = 0; c < 5; ++c) {
+        int newRow = i + dx * c;
+        int newCol = j + dy * c;
+        if (newRow >= 0 && newRow < BOX_COUNT + 1 && newCol >= 0 && newCol < BOX_COUNT + 1 &&
+            chess[newRow][newCol] == currentPiece) {
+            ++count;
+        } else {
+            return false;
+        }
+    }
+    return count == 5;
+}
+
+bool ChessBoard::canPut(int i, int j) {
+    return chess[i][j] == 0;
 }

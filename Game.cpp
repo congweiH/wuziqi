@@ -31,7 +31,7 @@ void Game::update() {
 void Game::pollEvents() {
     ExMessage msg{};
     if (peekmessage(&msg, EX_KEY | EX_MOUSE)) { // 检查鼠标和键盘消息
-        chessBoard->handleExMessage(msg);
+        chessBoard->pollEvents(msg);
         if (msg.message == WM_KEYDOWN) {
             // 处理键盘按键事件
             if (msg.vkcode == VK_ESCAPE) {

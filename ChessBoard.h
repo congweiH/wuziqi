@@ -11,7 +11,7 @@ public:
     void reset();
     void putWhiteChess(int i, int j);
     void putBlackChess(int i, int j);
-    void handleExMessage(const ExMessage& msg);
+    void pollEvents(const ExMessage& msg);
     bool pixelToChess(int x, int y, int& i, int& j) const;  // 像素坐标转化为棋盘坐标, 返还是否在棋盘内
     int hasWinner();                  // 是否有胜利者
 
@@ -21,4 +21,6 @@ public:
     int offsetX, offsetY;                    // 棋盘左上角坐标
     void putChess(int i, int j);
     int aimX, aimY;                          // 鼠标目标坐标
+    bool checkLine(int i, int j, int dx, int dy);  // 检查是否有连成一线的棋子
+    bool canPut(int i, int j);  // 是否可以下子
 };
