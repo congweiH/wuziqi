@@ -2,8 +2,8 @@
 
 // 画棋盘
 void ChessBoard::draw() {
-    offsetX = 60;
-    offsetY = 60;
+    offsetX = 40;
+    offsetY = 40;
     int expandWidth = 40;
     // 绘制底色
     setfillcolor(RGB(255, 205, 150));
