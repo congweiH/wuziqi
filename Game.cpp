@@ -1,5 +1,4 @@
 ﻿#include "Game.h"
-#include "Utils.h"
 
 Game::Game() {
     chessBoard = new ChessBoard();
@@ -13,13 +12,10 @@ void Game::draw() {
 
 void Game::update() {
     if (winner != 0) {
-        std::string winnerStr = winner == 1 ? "白棋赢了" : "黑棋赢了";
-        std::string content = std::string(winnerStr + "！" + "请问是否继续游戏？");
+        std::wstring winnerStr = winner == 1 ? L"白棋赢了" : L"黑棋赢了";
+        std::wstring content = winnerStr + L"！请问是否继续游戏？";
 
-        wchar_t* wideString = Utils::stringToWideChar(content);
-        int result = MessageBoxW(GetHWnd(), wideString , L"游戏结束", MB_OKCANCEL);
-        // 释放内存
-        delete[] wideString;
+        int result = MessageBoxW(GetHWnd(), content.c_str() , L"游戏结束", MB_OKCANCEL);
 
         if (result == IDOK) {
             // 用户点击了确定按钮
