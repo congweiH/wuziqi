@@ -60,9 +60,12 @@ void Game::run() {
     setbkcolor(WHITE);					// 设置背景颜色
     setbkmode(TRANSPARENT);				// 设置透明文字输出背景
 
+    LARGE_INTEGER frequency, start, end;
+    QueryPerformanceFrequency(&frequency);
+
     BeginBatchDraw();
     while (running) {
-        DWORD start = GetTickCount();
+        QueryPerformanceCounter(&start);
 
         pollEvents();
         update();
@@ -71,10 +74,10 @@ void Game::run() {
         draw();
         FlushBatchDraw();
 
-        DWORD duration = GetTickCount() - start;
-        if (duration < FPS_INTERVAL) {
-            // 如果当前的帧花费的时间比期望的少，则等待，以延迟到期望的时间
-            Sleep(FPS_INTERVAL - duration);
+        QueryPerformanceCounter(&end);
+        double elapsed = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
+        if (elapsed < FPS_INTERVAL) {
+            Sleep((long)((FPS_INTERVAL - elapsed) * 1000));
         }
     }
     EndBatchDraw();
