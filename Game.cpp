@@ -4,23 +4,14 @@
 Game::Game() {
     chessBoard = new ChessBoard();
 
-    initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, EX_NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
-    setbkcolor(WHITE);					// 设置背景颜色
-    setbkmode(TRANSPARENT);				// 设置透明文字输出背景
-
     restart();
-
 }
 
 void Game::draw() {
-    cleardevice();
     chessBoard->draw();
-    FlushBatchDraw();
 }
 
 void Game::update() {
-    pollEvents();
-
     if (winner != 0) {
         std::string winnerStr = winner == 1 ? "白棋赢了" : "黑棋赢了";
         std::string content = std::string(winnerStr + "！" + "请问是否继续游戏？");
@@ -62,16 +53,23 @@ void Game::restart() {
 
 Game::~Game() {
     delete chessBoard;
-    closegraph();
 }
 
 void Game::run() {
+    initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, EX_NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
+    setbkcolor(WHITE);					// 设置背景颜色
+    setbkmode(TRANSPARENT);				// 设置透明文字输出背景
+
     BeginBatchDraw();
     while (running) {
         DWORD start = GetTickCount();
 
+        pollEvents();
         update();
+
+        cleardevice();
         draw();
+        FlushBatchDraw();
 
         DWORD duration = GetTickCount() - start;
         if (duration < FPS_INTERVAL) {
@@ -80,4 +78,5 @@ void Game::run() {
         }
     }
     EndBatchDraw();
+    closegraph();
 }
