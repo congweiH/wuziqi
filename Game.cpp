@@ -10,7 +10,6 @@ Game::Game() {
 
     restart();
 
-    BeginBatchDraw();
 }
 
 void Game::draw() {
@@ -62,6 +61,23 @@ void Game::restart() {
 }
 
 Game::~Game() {
-    EndBatchDraw();
+    delete chessBoard;
     closegraph();
+}
+
+void Game::run() {
+    BeginBatchDraw();
+    while (running) {
+        DWORD start = GetTickCount();
+
+        update();
+        draw();
+
+        DWORD duration = GetTickCount() - start;
+        if (duration < FPS_INTERVAL) {
+            // 如果当前的帧花费的时间比期望的少，则等待，以延迟到期望的时间
+            Sleep(FPS_INTERVAL - duration);
+        }
+    }
+    EndBatchDraw();
 }

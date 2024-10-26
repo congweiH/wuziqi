@@ -6,6 +6,9 @@
 #define WINDOW_HEIGHT 440
 #define WINDOW_WIDTH 440
 
+#define FPS 144
+#define FPS_INTERVAL (1000 / FPS)
+
 class Game {
 public:
     Game();
@@ -14,6 +17,8 @@ public:
     void update();
     void pollEvents();
     void restart();
+
+    void run();
 
 public:
     ChessBoard* chessBoard; // 棋盘
