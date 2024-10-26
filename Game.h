@@ -9,6 +9,7 @@
 class Game {
 public:
     Game();
+    ~Game();
     void draw();
     void update();
     void pollEvents();

@@ -9,13 +9,14 @@ Game::Game() {
     setbkmode(TRANSPARENT);				// 设置透明文字输出背景
 
     restart();
+
+    BeginBatchDraw();
 }
 
 void Game::draw() {
     cleardevice();
-    BeginBatchDraw();
     chessBoard->draw();
-    EndBatchDraw();
+    FlushBatchDraw();
 }
 
 void Game::update() {
@@ -58,4 +59,9 @@ void Game::pollEvents() {
 void Game::restart() {
     chessBoard->reset();
     winner = 0;
+}
+
+Game::~Game() {
+    EndBatchDraw();
+    closegraph();
 }
