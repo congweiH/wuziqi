@@ -19,5 +19,4 @@ public:
     ChessBoard* chessBoard; // 棋盘
     bool running = true;  // 游戏是否正在进行
     int winner;
-    HWND windowHandle;
 };

@@ -4,7 +4,7 @@
 Game::Game() {
     chessBoard = new ChessBoard();
 
-    windowHandle = initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, EX_NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
+    initgraph(WINDOW_WIDTH, WINDOW_HEIGHT, EX_NOMINIMIZE);	// 初始化窗口，NOMINIMIZE表示不允许最小化
     setbkcolor(WHITE);					// 设置背景颜色
     setbkmode(TRANSPARENT);				// 设置透明文字输出背景
 
@@ -27,7 +27,7 @@ void Game::update() {
         std::string content = std::string(winnerStr + "！" + "请问是否继续游戏？");
 
         wchar_t* wideString = Utils::stringToWideChar(content);
-        int result = MessageBoxW(windowHandle, wideString , L"游戏结束", MB_OKCANCEL);
+        int result = MessageBoxW(GetHWnd(), wideString , L"游戏结束", MB_OKCANCEL);
         // 释放内存
         delete[] wideString;
 
