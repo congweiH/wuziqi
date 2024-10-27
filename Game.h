@@ -7,7 +7,7 @@
 #define WINDOW_WIDTH 440
 
 #define FPS 144
-#define FPS_INTERVAL (1.0 / FPS)
+#define FRAME_TIME (1000 / FPS)
 
 class Game {
 public:

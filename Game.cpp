@@ -34,9 +34,20 @@ void Game::pollEvents() {
     if (peekmessage(&msg, EX_KEY | EX_MOUSE)) { // 检查鼠标和键盘消息
         chessBoard->pollEvents(msg);
         if (msg.message == WM_KEYDOWN) {
-            // 处理键盘按键事件
-            if (msg.vkcode == VK_ESCAPE) {
-                running = false; // 按 ESC 键退出游戏
+            int boxResult;
+            switch (msg.vkcode) {
+                case VK_ESCAPE:
+                    boxResult = MessageBoxW(GetHWnd(), L"是否退出游戏？", L"提示", MB_OKCANCEL);
+                    if (boxResult == IDOK) {
+                        running = false;
+                    }
+                    break;
+                case 'R':
+                    boxResult = MessageBoxW(GetHWnd(), L"是否重新开始游戏？" , L"提示", MB_OKCANCEL);
+                    if (boxResult == IDOK) {
+                        restart();
+                    }
+                    break;
             }
         }
     }
@@ -56,12 +67,9 @@ void Game::run() {
     setbkcolor(WHITE);					// 设置背景颜色
     setbkmode(TRANSPARENT);				// 设置透明文字输出背景
 
-    LARGE_INTEGER frequency, start, end;
-    QueryPerformanceFrequency(&frequency);
-
     BeginBatchDraw();
     while (running) {
-        QueryPerformanceCounter(&start);
+        DWORD start = GetTickCount();
 
         pollEvents();
         update();
@@ -70,10 +78,9 @@ void Game::run() {
         draw();
         FlushBatchDraw();
 
-        QueryPerformanceCounter(&end);
-        double elapsed = (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
-        if (elapsed < FPS_INTERVAL) {
-            Sleep((long)((FPS_INTERVAL - elapsed) * 1000));
+        DWORD elapsed = GetTickCount() - start;
+        if (elapsed < FRAME_TIME) {
+            Sleep(FRAME_TIME - elapsed);
         }
     }
     EndBatchDraw();
