@@ -9,19 +9,25 @@
 #define FPS 144
 #define FRAME_TIME (1000 / FPS)
 
-class Game {
+class GameManager {
 public:
-    Game();
-    ~Game();
+    GameManager();
+    ~GameManager();
     void draw();
     void update();
     void pollEvents();
-    void restart();
 
     void run();
 
+    // 禁止拷贝和赋值操作
+    GameManager(const GameManager&) = delete;
+    GameManager& operator=(const GameManager&) = delete;
+
+    static GameManager* getInstance();
+
 public:
-    ChessBoard* chessBoard; // 棋盘
+
+    static GameManager* instance; // 静态实例指针
+
     bool running = true;  // 游戏是否正在进行
-    int winner;
 };

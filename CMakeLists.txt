@@ -11,5 +11,8 @@ link_libraries(libEasyX.a)
 
 add_executable(wuziqi main.cpp
         ChessBoard.cpp
-        Game.cpp
+        GameManager.cpp
+        SceneManager.cpp
+        PlayScene.cpp
+        Scene.cpp
 )
